@@ -1,158 +1,270 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Türkiye Posta Kodu Sorgulama</title>
 <style>
-  .pk-container {
+  :root {
+    --pk-blue: #0b5ed7;
+    --pk-blue-dark: #084bb0;
+    --pk-blue-tint: #eef5ff;
+    --pk-accent: #e63950;
+    --pk-text: #1f2937;
+    --pk-text-soft: #6b7280;
+    --pk-border: #e5e7eb;
+    --pk-bg: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 650px; /* Genişlik sitenize tam oturması için artırıldı */
-    margin: 20px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border: 1px solid #eaeaea;
-    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
   }
+
+  .pk-container {
+    width: 100%;
+    max-width: 650px;
+    margin: 0;
+    padding: 28px 30px 24px;
+    background: var(--pk-bg);
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+    border: 1px solid var(--pk-border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pk-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--pk-blue) 0%, var(--pk-accent) 100%);
+  }
+
   .pk-title {
-    text-align: center;
-    font-size: 1.3rem;
-    color: #333;
-    margin-bottom: 25px;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.15rem;
+    color: var(--pk-text);
+    margin: 4px 0 22px;
+    font-weight: 700;
   }
-  /* Seçim alanlarını yan yana getiren yeni satır yapısı */
+
+  .pk-title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--pk-blue-tint);
+    color: var(--pk-accent);
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
   .pk-form-row {
     display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 0;
   }
+
   .pk-form-group {
-    flex: 1; /* Alanları eşit genişlikte paylaştırır */
+    flex: 1;
+    min-width: 0;
   }
+
   .pk-form-group label {
     display: block;
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 8px;
-    font-weight: 500;
+    font-size: 0.82rem;
+    color: var(--pk-text-soft);
+    margin-bottom: 7px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
+
+  .pk-select-wrap {
+    position: relative;
+  }
+
+  .pk-select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--pk-text-soft);
+    border-bottom: 2px solid var(--pk-text-soft);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
   .pk-select {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    color: #333;
-    background-color: #fcfcfc;
-    transition: all 0.3s;
+    padding: 11px 34px 11px 13px;
+    border: 1.5px solid var(--pk-border);
+    border-radius: 9px;
+    font-size: 0.95rem;
+    color: var(--pk-text);
+    background-color: #fbfcfe;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
     appearance: none;
     cursor: pointer;
-    box-sizing: border-box;
+    font-family: inherit;
   }
+
+  .pk-select:hover:not(:disabled) {
+    border-color: #c7d7ef;
+  }
+
   .pk-select:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    border-color: var(--pk-blue);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.12);
   }
+
   .pk-select:disabled {
-    background-color: #f0f0f0;
+    background-color: #f4f5f7;
+    color: #a1a8b3;
     cursor: not-allowed;
   }
+
   .pk-result {
-    margin-top: 15px;
-    padding: 20px;
-    background-color: #e8f4fd;
-    border-left: 4px solid #007bff;
-    border-radius: 6px;
-    display: none;
+    margin-top: 18px;
+    padding: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.35s ease;
   }
+
+  .pk-result.pk-visible {
+    max-height: 200px;
+    opacity: 1;
+  }
+
+  .pk-result-inner {
+    padding: 18px 20px;
+    background-color: var(--pk-blue-tint);
+    border-left: 4px solid var(--pk-blue);
+    border-radius: 8px;
+  }
+
   .pk-result-flex {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    align-items: stretch;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 14px;
   }
+
   .pk-sub-result {
     text-align: center;
     flex: 1;
-    min-width: 150px;
-  }
-  .pk-result-title {
-    font-size: 0.85rem;
-    color: #555;
-    font-weight: 500;
-  }
-  .pk-result-text {
-    font-size: 1.7rem;
-    color: #0056b3;
-    font-weight: 700;
-    margin-top: 4px;
-  }
-  .pk-divider {
-    border-left: 1px dashed #b7dbf7;
-    height: 50px;
-    display: none;
-  }
-  .pk-note {
-    font-size: 0.75rem;
-    color: #777;
-    text-align: center;
-    margin-top: 20px;
+    min-width: 140px;
   }
 
-  /* Mobil Cihazlar İçin Uyumlu Tasarım (Responsive) */
-  @media (max-width: 550px) {
-    .pk-form-row {
-      flex-direction: column;
-      gap: 15px;
-    }
-    .pk-result-flex {
-      flex-direction: column;
-      gap: 15px;
-    }
+  .pk-result-title {
+    font-size: 0.78rem;
+    color: var(--pk-text-soft);
+    font-weight: 600;
+  }
+
+  .pk-result-text {
+    font-size: 1.6rem;
+    color: var(--pk-blue-dark);
+    font-weight: 800;
+    margin-top: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  #ilceSonucAlani .pk-result-text {
+    color: var(--pk-accent);
+  }
+
+  .pk-divider {
+    border-left: 1px dashed #b9d3f5;
+    display: none;
+  }
+
+  .pk-note {
+    font-size: 0.72rem;
+    color: #9ca3af;
+    text-align: center;
+    margin: 18px 0 0;
+  }
+
+  @media (max-width: 480px) {
+    .pk-container { padding: 22px 18px 18px; }
+    .pk-form-row { flex-direction: column; gap: 14px; }
+    .pk-result-flex { flex-direction: column; gap: 12px; }
     .pk-divider {
       border-left: none;
-      border-top: 1px dashed #b7dbf7;
+      border-top: 1px dashed #b9d3f5;
       width: 100%;
       height: 1px;
-      margin: 5px 0;
+      margin: 2px 0;
     }
   }
 </style>
+</head>
+<body>
 
-<div class="pk-container">
-  <div class="pk-title">📍 Türkiye Posta Kodu Sorgulama</div>
-  
+<div class="pk-container" id="pkContainer">
+  <div class="pk-title"><span class="pk-title-icon">📍</span>Türkiye Posta Kodu Sorgulama</div>
+
   <div class="pk-form-row">
     <div class="pk-form-group">
-      <label for="ilSecim">İl Seçiniz:</label>
-      <select id="ilSecim" class="pk-select">
-        <option value="">Lütfen Bir İl Seçin</option>
-      </select>
+      <label for="ilSecim">İl Seçiniz</label>
+      <div class="pk-select-wrap">
+        <select id="ilSecim" class="pk-select">
+          <option value="">Lütfen bir il seçin</option>
+        </select>
+      </div>
     </div>
 
     <div class="pk-form-group">
-      <label for="ilceSecim">İlçe Seçiniz:</label>
-      <select id="ilceSecim" class="pk-select" disabled>
-        <option value="">Önce İl Seçmelisiniz</option>
-      </select>
+      <label for="ilceSecim">İlçe Seçiniz</label>
+      <div class="pk-select-wrap">
+        <select id="ilceSecim" class="pk-select" disabled>
+          <option value="">Önce il seçmelisiniz</option>
+        </select>
+      </div>
     </div>
   </div>
 
   <div id="sonucAlani" class="pk-result">
-    <div class="pk-result-flex">
-      <div class="pk-sub-result" id="ilSonucAlani">
-        <div class="pk-result-title"><span id="txtSecilenIl">-</span> Genel Kodu:</div>
-        <div id="ilPostaKodu" class="pk-result-text">-</div>
-      </div>
-      
-      <div id="sonucCizgisi" class="pk-divider"></div>
-      
-      <div class="pk-sub-result" id="ilceSonucAlani" style="display: none;">
-        <div class="pk-result-title"><span id="txtSecilenIlce">-</span> İlçe Kodu:</div>
-        <div id="ilcePostaKodu" class="pk-result-text">-</div>
+    <div class="pk-result-inner">
+      <div class="pk-result-flex">
+        <div class="pk-sub-result" id="ilSonucAlani">
+          <div class="pk-result-title"><span id="txtSecilenIl">-</span> Genel Kodu</div>
+          <div id="ilPostaKodu" class="pk-result-text">-</div>
+        </div>
+
+        <div id="sonucCizgisi" class="pk-divider"></div>
+
+        <div class="pk-sub-result" id="ilceSonucAlani" style="display: none;">
+          <div class="pk-result-title"><span id="txtSecilenIlce">-</span> İlçe Kodu</div>
+          <div id="ilcePostaKodu" class="pk-result-text">-</div>
+        </div>
       </div>
     </div>
   </div>
-  
+
   <div class="pk-note">* Sonuçlar resmi merkez kodlarını gösterir.</div>
 </div>
 
@@ -256,9 +368,17 @@
   const ilcePostaKodu = document.getElementById("ilcePostaKodu");
   const txtSecilenIl = document.getElementById("txtSecilenIl");
   const txtSecilenIlce = document.getElementById("txtSecilenIlce");
+  const pkContainer = document.getElementById("pkContainer");
 
-  // Sayfa açılışında İlleri yükle
-  window.onload = function() {
+  // Üst pencereye (WordPress sitesine) gerçek yüksekliği bildir,
+  // böylece iframe her zaman içerik kadar yer kaplar, fazladan boşluk kalmaz.
+  function bildirYukseklik() {
+    const yukseklik = pkContainer.getBoundingClientRect().height;
+    window.parent.postMessage({ pkPostaKoduYukseklik: Math.ceil(yukseklik) }, "*");
+  }
+
+  // Sayfa açılışında illeri yükle
+  window.addEventListener("load", function() {
     const iller = Object.keys(postaKoduVerisi).sort();
     iller.forEach(il => {
       let option = document.createElement("option");
@@ -266,26 +386,24 @@
       option.textContent = il;
       ilSelect.appendChild(option);
     });
-  };
+    bildirYukseklik();
+  });
 
   // İl Seçildiğinde Çalışacak Kodlar
   ilSelect.addEventListener("change", function() {
     const secilenIl = this.value;
-    ilceSelect.innerHTML = '<option value="">Lütfen Bir İlçe Seçin</option>';
-    
-    // İlçe alanını ve ikinci sonuç alanını sıfırla
+    ilceSelect.innerHTML = '<option value="">Lütfen bir ilçe seçin</option>';
+
     ilceSonucAlani.style.display = "none";
     sonucCizgisi.style.display = "none";
-    
+
     if (secilenIl) {
       ilceSelect.disabled = false;
-      
-      // İl Genel Kodunu Göster
+
       txtSecilenIl.textContent = secilenIl;
       ilPostaKodu.textContent = ilGenelKodlari[secilenIl];
-      sonucAlani.style.display = "block";
-      
-      // İlçeleri listeye doldur
+      sonucAlani.classList.add("pk-visible");
+
       const ilceler = Object.keys(postaKoduVerisi[secilenIl]).sort();
       ilceler.forEach(ilce => {
         let option = document.createElement("option");
@@ -295,27 +413,36 @@
       });
     } else {
       ilceSelect.disabled = true;
-      ilceSelect.innerHTML = '<option value="">Önce İl Seçmelisiniz</option>';
-      sonucAlani.style.display = "none";
+      ilceSelect.innerHTML = '<option value="">Önce il seçmelisiniz</option>';
+      sonucAlani.classList.remove("pk-visible");
     }
+
+    setTimeout(bildirYukseklik, 60);
+    setTimeout(bildirYukseklik, 400);
   });
 
   // İlçe Seçildiğinde Çalışacak Kodlar
   ilceSelect.addEventListener("change", function() {
     const secilenIl = ilSelect.value;
     const secilenIlce = this.value;
-    
+
     if (secilenIlce) {
-      // İlçe Kodunu Göster
       txtSecilenIlce.textContent = secilenIlce;
       ilcePostaKodu.textContent = postaKoduVerisi[secilenIl][secilenIlce];
-      
-      // Görsel çizgiyi ve ilçe alanı görünür yap
+
       sonucCizgisi.style.display = "block";
       ilceSonucAlani.style.display = "block";
     } else {
       sonucCizgisi.style.display = "none";
       ilceSonucAlani.style.display = "none";
     }
+
+    setTimeout(bildirYukseklik, 60);
+    setTimeout(bildirYukseklik, 400);
   });
+
+  window.addEventListener("resize", bildirYukseklik);
 </script>
+
+</body>
+</html>
