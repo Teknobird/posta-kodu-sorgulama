@@ -1,0 +1,321 @@
+<style>
+  .pk-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 650px; /* Genişlik sitenize tam oturması için artırıldı */
+    margin: 20px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eaeaea;
+    box-sizing: border-box;
+  }
+  .pk-title {
+    text-align: center;
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 25px;
+    font-weight: 600;
+  }
+  /* Seçim alanlarını yan yana getiren yeni satır yapısı */
+  .pk-form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .pk-form-group {
+    flex: 1; /* Alanları eşit genişlikte paylaştırır */
+  }
+  .pk-form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .pk-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #333;
+    background-color: #fcfcfc;
+    transition: all 0.3s;
+    appearance: none;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  .pk-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+  }
+  .pk-select:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+  }
+  .pk-result {
+    margin-top: 15px;
+    padding: 20px;
+    background-color: #e8f4fd;
+    border-left: 4px solid #007bff;
+    border-radius: 6px;
+    display: none;
+  }
+  .pk-result-flex {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .pk-sub-result {
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+  }
+  .pk-result-title {
+    font-size: 0.85rem;
+    color: #555;
+    font-weight: 500;
+  }
+  .pk-result-text {
+    font-size: 1.7rem;
+    color: #0056b3;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .pk-divider {
+    border-left: 1px dashed #b7dbf7;
+    height: 50px;
+    display: none;
+  }
+  .pk-note {
+    font-size: 0.75rem;
+    color: #777;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  /* Mobil Cihazlar İçin Uyumlu Tasarım (Responsive) */
+  @media (max-width: 550px) {
+    .pk-form-row {
+      flex-direction: column;
+      gap: 15px;
+    }
+    .pk-result-flex {
+      flex-direction: column;
+      gap: 15px;
+    }
+    .pk-divider {
+      border-left: none;
+      border-top: 1px dashed #b7dbf7;
+      width: 100%;
+      height: 1px;
+      margin: 5px 0;
+    }
+  }
+</style>
+
+<div class="pk-container">
+  <div class="pk-title">📍 Türkiye Posta Kodu Sorgulama</div>
+  
+  <div class="pk-form-row">
+    <div class="pk-form-group">
+      <label for="ilSecim">İl Seçiniz:</label>
+      <select id="ilSecim" class="pk-select">
+        <option value="">Lütfen Bir İl Seçin</option>
+      </select>
+    </div>
+
+    <div class="pk-form-group">
+      <label for="ilceSecim">İlçe Seçiniz:</label>
+      <select id="ilceSecim" class="pk-select" disabled>
+        <option value="">Önce İl Seçmelisiniz</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="sonucAlani" class="pk-result">
+    <div class="pk-result-flex">
+      <div class="pk-sub-result" id="ilSonucAlani">
+        <div class="pk-result-title"><span id="txtSecilenIl">-</span> Genel Kodu:</div>
+        <div id="ilPostaKodu" class="pk-result-text">-</div>
+      </div>
+      
+      <div id="sonucCizgisi" class="pk-divider"></div>
+      
+      <div class="pk-sub-result" id="ilceSonucAlani" style="display: none;">
+        <div class="pk-result-title"><span id="txtSecilenIlce">-</span> İlçe Kodu:</div>
+        <div id="ilcePostaKodu" class="pk-result-text">-</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="pk-note">* Sonuçlar resmi merkez kodlarını gösterir.</div>
+</div>
+
+<script>
+  // 81 İlin Genel/Merkez Posta Kodları
+  const ilGenelKodlari = {
+    "Adana":"01000", "Adıyaman":"02000", "Afyonkarahisar":"03000", "Ağrı":"04000", "Amasya":"05000", "Ankara":"06000", "Antalya":"07000", "Artvin":"08000", "Aydın":"09000", "Balıkesir":"10000", "Bilecik":"11000", "Bingöl":"12000", "Bitlis":"13000", "Bolu":"14000", "Burdur":"15000", "Bursa":"16000", "Çanakkale":"17000", "Çankırı":"18000", "Çorum":"19000", "Denizli":"20000", "Diyarbakır":"21000", "Edirne":"22000", "Elazığ":"23000", "Erzincan":"24000", "Erzurum":"25000", "Eskişehir":"26000", "Gaziantep":"27000", "Giresun":"28000", "Gümüşhane":"29000", "Hakkari":"30000", "Hatay":"31000", "Isparta":"32000", "Mersin":"33000", "İstanbul":"34000", "İzmir":"35000", "Kars":"36000", "Kastamonu":"37000", "Kayseri":"38000", "Kırklareli":"39000", "Kırşehir":"40000", "Kocaeli":"41000", "Konya":"42000", "Kütahya":"43000", "Malatya":"44000", "Manisa":"45000", "Kahramanmaraş":"46000", "Mardin":"47000", "Muğla":"48000", "Muş":"49000", "Nevşehir":"50000", "Niğde":"51000", "Ordu":"52000", "Rize":"53000", "Sakarya":"54000", "Samsun":"55000", "Siirt":"56000", "Sinop":"57000", "Sivas":"58000", "Tekirdağ":"59000", "Tokat":"60000", "Trabzon":"61000", "Tunceli":"62000", "Şanlıurfa":"63000", "Uşak":"64000", "Van":"65000", "Yozgat":"66000", "Zonguldak":"67000", "Aksaray":"68000", "Bayburt":"69000", "Karaman":"70000", "Kırıkkale":"71000", "Batman":"72000", "Şırnak":"73000", "Bartın":"74000", "Ardahan":"75000", "Iğdır":"76000", "Yalova":"77000", "Karabük":"78000", "Kilis":"79000", "Osmaniye":"80000", "Düzce":"81000"
+  };
+
+  // Güncel 973 İlçe Veritabanı
+  const postaKoduVerisi = {
+    "Adana": {"Aladağ":"01720", "Ceyhan":"01920", "Çukurova":"01170", "Feke":"01660", "İmamoğlu":"01700", "Karaisalı":"01770", "Karataş":"01900", "Kozan":"01500", "Pozantı":"01470", "Saimbeyli":"01610", "Sarıçam":"01250", "Seyhan":"01130", "Tufanbeyli":"01630", "Yumurtalık":"01910", "Yüreğir":"01230"},
+    "Adıyaman": {"Besni":"02300", "Çelikhan":"02600", "Gerger":"02700", "Gölbaşı":"02500", "Kahta":"02400", "Merkez":"02000", "Samsat":"02800", "Sincik":"02900", "Tut":"02350"},
+    "Afyonkarahisar": {"Başmakçı":"03450", "Bayat":"03780", "Bolvadin":"03300", "Çay":"03100", "Çobanlar":"03330", "Dazkırı":"03950", "Dinar":"03030", "Emirdağ":"03800", "Evciler":"03900", "Hocalar":"03530", "İhsaniye":"03370", "İscehisar":"03750", "Kızılören":"03060", "Merkez":"03000", "Sandıklı":"03500", "Sinanpaşa":"03850", "Sultandağı":"03160", "Şuhut":"03900"},
+    "Ağrı": {"Diyadin":"04200", "Doğubayazıt":"04100", "Eleşkirt":"04600", "Hamur":"04700", "Merkez":"04000", "Patnos":"04500", "Taşlıçay":"04300", "Tutak":"04400"},
+    "Amasya": {"Göynücek":"05900", "Gümüşhacıköy":"05500", "Hamamözü":"05720", "Merkez":"05000", "Merzifon":"05300", "Suluova":"05400", "Taşova":"05800"},
+    "Ankara": {"Akyurt":"06750", "Altındağ":"06050", "Ayaş":"06710", "Bala":"06720", "Beypazarı":"06730", "Çamlıdere":"06740", "Çankaya":"06690", "Çubuk":"06760", "Elmadağ":"06780", "Etimesgut":"06790", "Evren":"06770", "Gölbaşı":"06830", "Güdül":"06840", "Haymana":"06860", "Kahramankazan":"06980", "Kalecik":"06870", "Keçiören":"06120", "Kızılcahamam":"06890", "Mamak":"06260", "Nallıhan":"06920", "Polatlı":"06900", "Pursaklar":"06145", "Sincan":"06930", "Şereflikoçhisar":"06950", "Yenimahalle":"06170"},
+    "Antalya": {"Akseki":"07630", "Aksu":"07112", "Alanya":"07400", "Demre":"07570", "Döşemealtı":"07190", "Elmalı":"07700", "Finike":"07740", "Gazipaşa":"07900", "Gündoğmuş":"07800", "İbradı":"07680", "Kaş":"07580", "Kemer":"07980", "Kepez":"07060", "Konyaaltı":"07070", "Korkuteli":"07800", "Kumluca":"07350", "Manavgat":"07600", "Muratpaşa":"07100", "Serik":"07500"},
+    "Artvin": {"Ardanuç":"08300", "Arhavi":"08200", "Borçka":"08400", "Hopa":"08600", "Kemalpaşa":"08610", "Merkez":"08000", "Murgul":"08500", "Şavşat":"08700", "Yusufeli":"08800"},
+    "Aydın": {"Bozdoğan":"09760", "Buharkent":"09170", "Çine":"09500", "Didim":"09270", "Efeler":"09010", "Germencik":"09400", "İincirliova":"09600", "Karacasu":"09370", "Karpuzlu":"09540", "Koçarlı":"09970", "Köşk":"09570", "Kuşadası":"09400", "Kuyucak":"09320", "Nazilli":"09800", "Söke":"09200", "Sultanhisar":"09470", "Yenipazar":"09350"},
+    "Balıkesir": {"Altıeylül":"10100", "Ayvalık":"10400", "Balya":"10840", "Bandırma":"10200", "Bigadiç":"10440", "Burhaniye":"10700", "Dursunbey":"10800", "Edremit":"10300", "Erdek":"10500", "Gömeç":"10715", "Gönen":"10900", "Havran":"10560", "İvrindi":"10770", "Karesi":"10010", "Kepsut":"10660", "Manyas":"10470", "Marmara":"10350", "Savaştepe":"10580", "Sındırgı":"10330", "Susurluk":"10600"},
+    "Bilecik": {"Bozüyük":"11300", "Gölpazarı":"11700", "İnhisar":"11800", "Merkez":"11000", "Osmaneli":"11500", "Pazaryeri":"11830", "Söğüt":"11400", "Yenipazar":"11600"},
+    "Bingöl": {"Adaklı":"12100", "Genç":"12500", "Karlıova":"12600", "Kiğı":"12200", "Merkez":"12000", "Solhan":"12400", "Yayladere":"12300", "Yedisu":"12120"},
+    "Bitlis": {"Adilcevaz":"13500", "Ahlat":"13450", "Güroymak":"13200", "Hizan":"13600", "Merkez":"13000", "Mutki":"13700", "Tatvan":"13400"},
+    "Bolu": {"Dörtdivan":"14910", "Gerede":"14900", "Göynük":"14780", "Kıbrıscık":"14610", "Mengen":"14860", "Merkez":"14000", "Mudurnu":"14800", "Seben":"14750", "Yeniçağa":"14920"},
+    "Burdur": {"Ağlasun":"15800", "Altınyayla":"15360", "Bucak":"15300", "Çavdır":"15330", "Çeltikçi":"15310", "Gölhisar":"15400", "Karamanlı":"15350", "Kemer":"15340", "Merkez":"15000", "Tefenni":"15600", "Yeşilova":"15100"},
+    "Bursa": {"Büyükorhan":"16990", "Gemlik":"16600", "Gürsu":"16580", "Harmancık":"16450", "İnegöl":"16400", "İznik":"16860", "Karacabey":"16700", "Keles":"16740", "Kestel":"16450", "Mudanya":"16940", "Mustafakemalpaşa":"16500", "Nilüfer":"16130", "Orhaneli":"16790", "Orhangazi":"16800", "Osmangazi":"16050", "Yenişehir":"16900", "Yıldırım":"16320"},
+    "Çanakkale": {"Ayvacık":"17800", "Bayramiç":"17700", "Biga":"17200", "Bozcaada":"17680", "Çan":"17400", "Eceabat":"17900", "Ezine":"17600", "Gelibolu":"17500", "Gökçeada":"17760", "Lapseki":"17100", "Merkez":"17000", "Yenice":"17550"},
+    "Çankırı": {"Atkaracalar":"18310", "Bayramören":"18330", "Çerkeş":"18600", "Eldivan":"18700", "Ilgaz":"18400", "Kızılırmak":"18280", "Korgun":"18100", "Kurşunlu":"18300", "Merkez":"18000", "Orta":"18300", "Şabanözü":"18650", "Yapraklı":"18900"},
+    "Çorum": {"Alaca":"19100", "Bayat":"19800", "Boğazkale":"19310", "Dodurga":"19700", "İskilip":"19400", "Kargı":"19900", "Laçin":"19600", "Mecitözü":"19750", "Merkez":"19000", "Oğuzlar":"19430", "Ortaköy":"19950", "Osmancık":"19500", "Sungurlu":"19300", "Uğurludağ":"19850"},
+    "Denizli": {"Acıpayam":"20300", "Babadağ":"20470", "Baklan":"20700", "Bekilli":"20800", "Beyağaç":"20590", "Bozkurt":"20360", "Buldan":"20400", "Çal":"20700", "Çameli":"20860", "Çardak":"20350", "Çivril":"20600", "Güney":"20460", "Honaz":"20330", "Kale":"20570", "Merkezefendi":"20020", "Pamukkale":"20150", "Sarayköy":"20300", "Serinhisar":"20430", "Tavas":"20500"},
+    "Diyarbakır": {"Bağlar":"21050", "Bismil":"21500", "Çermik":"21600", "Çınar":"21100", "Çüngüş":"21650", "Dicle":"21800", "Eğil":"21850", "Ergani":"21900", "Hani":"21700", "Hazro":"21760", "Kayapınar":"21070", "Kocaköy":"21560", "Kulp":"21950", "Lice":"21750", "Silvan":"21600", "Sur":"21200", "Yenişehir":"21100"},
+    "Edirne": {"Enez":"22700", "Havsa":"22500", "İpsala":"22400", "Keşan":"22800", "Lalapaşa":"22550", "Meriç":"22600", "Merkez":"22000", "Süloğlu":"22580", "Uzunköprü":"22200"},
+    "Elazığ": {"Ağın":"23960", "Alacakaya":"23050", "Arıcak":"23060", "Baskil":"23850", "Karakoçan":"23500", "Keban":"23710", "Kovancılar":"23800", "Maden":"23700", "Merkez":"23000", "Palu":"23900", "Sivrice":"23600"},
+    "Erzincan": {"Çayırlı":"24540", "İliç":"24700", "Kemah":"24600", "Kemaliye":"24650", "Merkez":"24000", "Otlukbeli":"24550", "Refahiye":"24300", "Tercan":"24500", "Üzümlü":"24160"},
+    "Erzurum": {"Aşkale":"25500", "Aziziye":"25100", "Çat":"25750", "Hınıs":"25600", "Horasan":"25800", "İspir":"25900", "Karaçoban":"25610", "Karayazı":"25650", "Köprüköy":"25830", "Narman":"25530", "Oltu":"25400", "Olur":"25560", "Palandöken":"25070", "Pasinler":"25200", "Pazaryolu":"25930", "Şenkaya":"25300", "Tekman":"25560", "Tortum":"25450", "Uzundere":"25440", "Yakutiye":"25050"},
+    "Eskişehir": {"Alpu":"26900", "Beylikova":"26800", "Çeler":"26100", "Çifteler":"26700", "Günyüzü":"26420", "Han":"26750", "İnönü":"26670", "Mahmudiye":"26850", "Mihalgazi":"26950", "Mihalıççık":"26980", "Odunpazarı":"26010", "Sarıcakaya":"26930", "Seyitgazi":"26940", "Sivrihisar":"26600", "Tepebaşı":"26120"},
+    "Gaziantep": {"Araban":"27650", "İslahiye":"27400", "Karkamış":"27830", "Nizip":"27700", "Nurdağı":"27300", "Oğuzeli":"27900", "Şahinbey":"27010", "Şehitkamil":"27500", "Yavuzeli":"27950"},
+    "Giresun": {"Alucra":"28700", "Bulancak":"28300", "Çamoluk":"28710", "Çanakçı":"28810", "Dereli":"28950", "Doğankent":"28900", "Espiye":"28500", "Eynesil":"28850", "Görele":"28800", "Güce":"28510", "Keşap":"28900", "Merkez":"28000", "Piraziz":"28340", "Şebinkarahisar":"28400", "Tirebolu":"28600", "Yağlıdere":"28610"},
+    "Gümüşhane": {"Kelkit":"29600", "Köse":"29650", "Kürtün":"29800", "Merkez":"29000", "Şiran":"29700", "Torul":"29800"},
+    "Hakkari": {"Çukurca":"30400", "Derecik":"30510", "Merkez":"30000", "Şemdinli":"30500", "Yüksekova":"30300"},
+    "Hatay": {"Altınözü":"31750", "Antakya":"31000", "Arsuz":"31280", "Belen":"31350", "Defne":"31160", "Dörtyol":"31400", "Erzin":"31960", "Hassa":"31700", "İskenderun":"31200", "Kırıkhan":"31440", "Kumlu":"31520", "Payas":"31370", "Reyhanlı":"31500", "Samandağ":"31500", "Yayladağı":"31100"},
+    "Isparta": {"Aksu":"32510", "Atabey":"32670", "Eğirdir":"32500", "Gelendost":"32530", "Gönen":"32050", "Keçiborlu":"32750", "Merkez":"32000", "Senirkent":"32260", "Sütçüler":"32570", "Şarkikaraağaç":"32800", "Uluborlu":"32650", "Yalvaç":"32700", "Yenişarbademli":"32850"},
+    "Mersin": {"Akdeniz":"33010", "Anamur":"33830", "Aydıncık":"33840", "Bozyazı":"33830", "Çamlıyayla":"33580", "Erdemli":"33730", "Gülnar":"33700", "Mezitli":"33200", "Mut":"33600", "Silifke":"33940", "Tarsus":"33400", "Toroslar":"33220", "Yenişehir":"33110"},
+    "İstanbul": {"Adalar":"34970", "Arnavutköy":"34283", "Ataşehir":"34758", "Avcılar":"34320", "Bağcılar":"34200", "Bahçelievler":"34180", "Bakırköy":"34140", "Başakşehir":"34480", "Bayrampaşa":"34030", "Beşiktaş":"34353", "Beykoz":"34800", "Beylikdüzü":"34520", "Beyoğlu":"34421", "Büyükçekmece":"34500", "Çatalca":"34540", "Çekmeköy":"34782", "Esenler":"34220", "Esenyurt":"34510", "Eyüpsultan":"34050", "Fatih":"34093", "Gaziosmanpaşa":"34245", "Güngören":"34160", "Kadıköy":"34710", "Kağıthane":"34406", "Kartal":"34860", "Küçükçekmece":"34290", "Maltepe":"34840", "Pendik":"34890", "Sancaktepe":"34885", "Sarıyer":"34450", "Silivri":"34570", "Sultanbeyli":"34920", "Sultangazi":"34270", "Şile":"34980", "Şişli":"34360", "Tuzla":"34940", "Ümraniye":"34760", "Üsküdar":"34660", "Zeytinburnu":"34020"},
+    "İzmir": {"Aliağa":"35800", "Balçova":"35330", "Bayındır":"35840", "Bayraklı":"35530", "Bergama":"35700", "Beydağ":"35790", "Bornova":"35040", "Buca":"35390", "Çeşme":"35930", "Çiğli":"35620", "Dikili":"35980", "Foça":"35680", "Gaziemir":"35410", "Güzelbahçe":"35310", "Karabağlar":"35130", "Karaburun":"35960", "Karşıyaka":"35500", "Kemalpaşa":"35730", "Kınık":"35990", "Kiraz":"35890", "Konak":"35210", "Menderes":"35470", "Menemen":"35660", "Narlıdere":"35320", "Ödemiş":"35750", "Seferihisar":"35460", "Selçuk":"35920", "Tire":"35900", "Torbalı":"35860", "Urla":"35430"},
+    "Kars": {"Akyaka":"36800", "Arpaçay":"36300", "Digor":"36700", "Kağızman":"36900", "Merkez":"36000", "Sarıkamış":"36500", "Selim":"36600", "Susuz":"36750"},
+    "Kastamonu": {"Abana":"37970", "Ağlı":"37940", "Araç":"37800", "Azdavay":"37750", "Bozkurt":"37960", "Cide":"37840", "Çatalzeytin":"37950", "Daday":"37860", "Devrekani":"37900", "Doğanyurt":"37850", "Hanönü":"37920", "İhsangazi":"37870", "İnebolu":"37500", "Küre":"37910", "Merkez":"37000", "Pınarbaşı":"37770", "Seydiler":"37930", "Şenpazar":"37880", "Taşköprü":"37400", "Tosya":"37300"},
+    "Kayseri": {"Akkışla":"38730", "Bünyan":"38600", "Develi":"38400", "Felahiye":"38850", "Hacılar":"38140", "İncesu":"38800", "Kocasinan":"38020", "Melikgazi":"38030", "Özvatan":"38740", "Pınarbaşı":"38700", "Sarıoğlan":"38830", "Sarız":"38450", "Talas":"38280", "Tomarza":"38900", "Yahyalı":"38500", "Yeşilhisar":"38300"},
+    "Kırklareli": {"Babaeski":"39200", "Demirköy":"39500", "Kofçaz":"39750", "Lüleburgaz":"39700", "Merkez":"39000", "Pehlivanköy":"39300", "Pınarhisar":"39350", "Vize":"39400"},
+    "Kırşehir": {"Akçakent":"40720", "Akpınar":"40730", "Boztepe":"40710", "Çiçekdağı":"40700", "Kaman":"40300", "Merkez":"40000", "Mucur":"40200"},
+    "Kocaeli": {"Başiskele":"41140", "Çayırova":"41420", "Darıca":"41400", "Derince":"41900", "Dilovası":"41455", "Gebze":"41400", "Gölcük":"41650", "İzmit":"41040", "Kandıra":"41600", "Karamürsel":"41500", "Kartepe":"41180", "Körfez":"41750"},
+    "Konya": {"Ahırlı":"42930", "Akören":"42460", "Akşehir":"42550", "Altınekin":"42780", "Beyşehir":"42700", "Bozkır":"42650", "Cihanbeyli":"42850", "Çeltik":"42830", "Çumra":"42500", "Derbent":"42160", "Derebucak":"42760", "Doğanhisar":"42560", "Emirgazi":"42720", "Ereğli":"42310", "Güneysınır":"42490", "Hadim":"42870", "Halkapınar":"42340", "Hüyük":"42710", "Ilgın":"42600", "Kadınhanı":"42800", "Karapınar":"42400", "Karatay":"42020", "Kulu":"42770", "Meram":"42010", "Sarayönü":"42430", "Selçuklu":"42060", "Seydişehir":"42370", "Taşkent":"42880", "Tuzlukçu":"42550", "Yalıhüyük":"42940", "Yunak":"42810"},
+    "Kütahya": {"Altıntaş":"43800", "Aslanapa":"43120", "Çavdarhisar":"43130", "Domaniç":"43220", "Dumlupınar":"43820", "Emet":"43700", "Gediz":"43600", "Hisarcık":"43740", "Merkez":"43000", "Pazarlar":"43760", "Simav":"43500", "Şaphane":"43770", "Tavşanlı":"43300"},
+    "Malatya": {"Akçadağ":"44210", "Arapgir":"44800", "Arguvan":"44900", "Battalgazi":"44010", "Darende":"44700", "Doğanşehir":"44200", "Doğanyol":"44860", "Hekimhan":"44400", "Kale":"44370", "Kuluncak":"44760", "Pütürge":"44850", "Yazıhan":"44350", "Yeşilyurt":"44110"},
+    "Manisa": {"Ahmetli":"45450", "Akhisar":"45200", "Alaşehir":"45600", "Demirci":"45900", "Gölmarmara":"45320", "Gördes":"45800", "Kırkağaç":"45700", "Köprübaşı":"45880", "Kula":"45170", "Salihli":"45300", "Sarıgöl":"45470", "Saruhanlı":"45800", "Selendi":"45970", "Soma":"45500", "Şehzadeler":"45010", "Turgutlu":"45400", "Yunusemre":"45030"},
+    "Kahramanmaraş": {"Afşin":"46500", "Andırın":"46400", "Çağlayancerit":"46720", "Dulkadiroğlu":"46060", "Ekinözü":"46360", "Elbistan":"46300", "Göksun":"46600", "Nurhak":"46450", "Onikişubat":"46050", "Pazarcık":"46200", "Türkoğlu":"46800"},
+    "Mardin": {"Artuklu":"47100", "Dargeçit":"47800", "Derik":"47850", "Kızıltepe":"47400", "Mazıdağı":"47700", "Midyat":"47500", "Nusaybin":"47300", "Ömerli":"47560", "Savur":"47650", "Yeşilli":"47110"},
+    "Muğla": {"Bodrum":"48400", "Dalaman":"48770", "Datça":"48900", "Fethiye":"48300", "Kavaklıdere":"48590", "Köyceğiz":"48800", "Marmaris":"48700", "Menteşe":"48000", "Milas":"48200", "Ortaca":"48600", "Seydikemer":"48360", "Ula":"48140", "Yatağan":"48500"},
+    "Muş": {"Bulanık":"49500", "Hasköy":"49250", "Korkut":"49300", "Malazgirt":"49400", "Merkez":"49000", "Varto":"49600"},
+    "Nevşehir": {"Acıgöl":"50300", "Avanos":"50500", "Derinkuyu":"50700", "Gülşehir":"50900", "Hacıbektaş":"50800", "Kozaklı":"50600", "Merkez":"50000", "Ürgüp":"50400"},
+    "Niğde": {"Altunhisar":"51550", "Bor":"51700", "Çamardı":"51600", "Çiftlik":"51500", "Merkez":"51000", "Ulukışla":"51900"},
+    "Ordu": {"Akkuş":"52850", "Altınordu":"52020", "Aybastı":"52500", "Çamaş":"52450", "Çatalpınar":"52460", "Çaybaşı":"52330", "Fatsa":"52400", "Gölköy":"52600", "Gülyalı":"52010", "Gürgentepe":"52610", "İkizce":"52310", "Kabadüz":"52030", "Kabataş":"52530", "Korgan":"52700", "Kumru":"52800", "Mesudiye":"52200", "Perşembe":"52750", "Ulubey":"52550", "Ünye":"52300"},
+    "Rize": {"Ardeşen":"53400", "Çamlıhemşin":"53780", "Çayeli":"53200", "Derepazarı":"53360", "Fındıklı":"53700", "Güneysu":"53350", "Hemşin":"53550", "İkizdere":"53690", "İyidere":"53600", "Kalkandere":"53500", "Merkez":"53000", "Pazar":"53300"},
+    "Sakarya": {"Adapazarı":"54100", "Akyazı":"54400", "Arifiye":"54580", "Erenler":"54200", "Ferizli":"54110", "Geyve":"54700", "Hendek":"54300", "Karapürçek":"54420", "Karasu":"54500", "Kaynarca":"54600", "Kocaali":"54800", "Pamukova":"54900", "Sapanca":"54600", "Serdivan":"54050", "Söğütlü":"54120", "Taraklı":"54750"},
+    "Samsun": {"19 Mayıs":"55420", "Alaçam":"55800", "Asarcık":"55860", "Atakum":"55200", "Ayvacık":"55550", "Bafra":"55400", "Canik":"55080", "Çarşamba":"55500", "Havza":"55700", "İlkadım":"55020", "Kavak":"55580", "Ladik":"55760", "Salıpazarı":"55680", "Tekkeköy":"55300", "Terme":"55600", "Vezirköprü":"55700", "Yakakent":"55810"},
+    "Siirt": {"Baykan":"56300", "Eruh":"56400", "Kurtalan":"56200", "Merkez":"56000", "Pervari":"56500", "Şirvan":"56600", "Tillo":"56020"},
+    "Sinop": {"Ayancık":"57100", "Boyabat":"57200", "Dikmen":"57180", "Durağan":"57500", "Erfelek":"57130", "Gerze":"57600", "Merkez":"57000", "Saraydüzü":"57250", "Türkeli":"57300"},
+    "Sivas": {"Akıncılar":"58550", "Altınyayla":"58850", "Divriği":"58300", "Doğanşar":"58610", "Gemerek":"58400", "Gölova":"58560", "Gürün":"58800", "Hafik":"58760", "İmranlı":"58980", "Kangal":"58900", "Koyulhisar":"58660", "Merkez":"58000", "Suşehri":"58600", "Şarkışla":"58400", "Ulaş":"58950", "Yıldızeli":"58500", "Zara":"58700"},
+    "Tekirdağ": {"Çerkezköy":"59500", "Çorlu":"59850", "Ergene":"59930", "Hayrabolu":"59400", "Kapaklı":"59510", "Malkara":"59300", "Marmaraereğlisi":"59740", "Muratlı":"59700", "Saray":"59600", "Süleymanpaşa":"59030", "Şarköy":"59800"},
+    "Tokat": {"Almus":"60200", "Artova":"60660", "Başçiftlik":"60620", "Erbaa":"60500", "Merkez":"60000", "Niksar":"60600", "Pazar":"60800", "Reşadiye":"60700", "Sulusaray":"60870", "Turhal":"60300", "Yeşilyurt":"60860", "Zile":"60400"},
+    "Trabzon": {"Akçaabat":"61300", "Araklı":"61700", "Arsin":"61900", "Beşikdüzü":"61400", "Çarşıbaşı":"61410", "Çaykara":"61940", "Dernekpazarı":"61960", "Düzköy":"61390", "Hayrat":"61820", "Köprübaşı":"61630", "Maçka":"61750", "Of":"61830", "Ortahisar":"61030", "Sürmene":"61600", "Şalpazarı":"61460", "Tonya":"61500", "Vakfıkebir":"61400", "Yomra":"61250"},
+    "Tunceli": {"Çemişgezek":"62600", "Hozat":"62500", "Mazgirt":"62800", "Merkez":"62000", "Nazımiye":"62700", "Ovacık":"62400", "Pertek":"62500", "Pülümür":"62900"},
+    "Şanlıurfa": {"Akçakale":"63500", "Birecik":"63400", "Bozova":"63850", "Ceylanpınar":"63760", "Eyyübiye":"63200", "Halfeti":"63270", "Haliliye":"63040", "Harran":"63570", "Hilvan":"63900", "Karaköprü":"63320", "Siverek":"63600", "Suruç":"63800", "Viranşehir":"63700"},
+    "Uşak": {"Banaz":"64500", "Eşme":"64600", "Karahallı":"64700", "Merkez":"64000", "Sivaslı":"64800", "Ulubey":"64900"},
+    "Van": {"Bahçesaray":"65800", "Başkale":"65600", "Çaldıran":"65950", "Çatak":"65700", "Edremit":"65130", "Erciş":"65400", "Gevaş":"65800", "Gürpınar":"65900", "İpekyolu":"65100", "Muradiye":"65500", "Özalp":"65900", "Saray":"65960", "Tuşba":"65040"},
+    "Yozgat": {"Akdağmadeni":"66300", "Aydıncık":"66120", "Boğazlıyan":"66400", "Çandır":"66450", "Çayıralan":"66500", "Çekerek":"66200", "Kadışehri":"66250", "Merkez":"66000", "Saraykent":"66350", "Sarıkaya":"66600", "Sorgun":"66500", "Şefaatli":"66800", "Yenifakılı":"66460", "Yerköy":"66900"},
+    "Zonguldak": {"Alaplı":"67850", "Çaycuma":"67900", "Devrek":"67800", "Ereğli":"67300", "Gökçebey":"67700", "Kilimli":"67280", "Kozlu":"67160", "Merkez":"67000"},
+    "Aksaray": {"Ağaçören":"68600", "Eskil":"68400", "Gülağaç":"68900", "Güzelyurt":"68500", "Merkez":"68000", "Ortaköy":"68200", "Sarıyahşi":"68700", "Sultanhanı":"68100"},
+    "Bayburt": {"Aydıntepe":"69500", "Demirözü":"69400", "Merkez":"69000"},
+    "Karaman": {"Ayrancı":"70500", "Başyayla":"70600", "Ermenek":"70400", "Kazımkarabekir":"70300", "Merkez":"70000", "Sarıveliler":"70650"},
+    "Kırıkkale": {"Bahşılı":"71460", "Balışeyh":"71500", "Çelebi":"71720", "Delice":"71600", "Karakeçili":"71740", "Keskin":"71800", "Merkez":"71000", "Sulakyurt":"71900", "Yahşihan":"71450"},
+    "Batman": {"Beşiri":"72200", "Gercüş":"72300", "Hasankeyf":"72350", "Kozluk":"72400", "Merkez":"72000", "Sason":"72500"},
+    "Şırnak": {"Beytüşşebap":"73800", "Cizre":"73200", "Güçlükonak":"73300", "İdil":"73300", "Merkez":"73000", "Silopi":"73400", "Uludere":"73500"},
+    "Bartın": {"Amasra":"74300", "Kurucaşile":"74600", "Merkez":"74000", "Ulus":"74400"},
+    "Ardahan": {"Çıldır":"75500", "Damal":"75600", "Göle":"75700", "Hanak":"75800", "Merkez":"75000", "Posof":"75900"},
+    "Iğdır": {"Aralık":"76500", "Karakoyunlu":"76200", "Merkez":"76000", "Tuzluca":"76900"},
+    "Yalova": {"Altınova":"77700", "Armutlu":"77500", "Çınarcık":"77300", "Çiftlikköy":"77600", "Merkez":"77000", "Termal":"77400"},
+    "Karabük": {"Eflani":"78300", "Eskipazar":"78400", "Merkez":"78000", "Ovacık":"78800", "Safranbolu":"78600", "Yenice":"78700"},
+    "Kilis": {"Elbeyli":"79500", "Merkez":"79000", "Musabeyli":"79400", "Polateli":"79600"},
+    "Osmaniye": {"Bahçe":"80500", "Düziçi":"80600", "Hasanbeyli":"80550", "Kadirli":"80700", "Merkez":"80000", "Sumbas":"80750", "Toprakkale":"80100"},
+    "Düzce": {"Akçakoca":"81650", "Cumayeri":"81700", "Çilimli":"81750", "Gölyaka":"81800", "Gümüşova":"81850", "Kaynaşlı":"81900", "Merkez":"81000", "Yığılca":"81950"}
+  };
+
+  const ilSelect = document.getElementById("ilSecim");
+  const ilceSelect = document.getElementById("ilceSecim");
+  const sonucAlani = document.getElementById("sonucAlani");
+  const ilceSonucAlani = document.getElementById("ilceSonucAlani");
+  const sonucCizgisi = document.getElementById("sonucCizgisi");
+  const ilPostaKodu = document.getElementById("ilPostaKodu");
+  const ilcePostaKodu = document.getElementById("ilcePostaKodu");
+  const txtSecilenIl = document.getElementById("txtSecilenIl");
+  const txtSecilenIlce = document.getElementById("txtSecilenIlce");
+
+  // Sayfa açılışında İlleri yükle
+  window.onload = function() {
+    const iller = Object.keys(postaKoduVerisi).sort();
+    iller.forEach(il => {
+      let option = document.createElement("option");
+      option.value = il;
+      option.textContent = il;
+      ilSelect.appendChild(option);
+    });
+  };
+
+  // İl Seçildiğinde Çalışacak Kodlar
+  ilSelect.addEventListener("change", function() {
+    const secilenIl = this.value;
+    ilceSelect.innerHTML = '<option value="">Lütfen Bir İlçe Seçin</option>';
+    
+    // İlçe alanını ve ikinci sonuç alanını sıfırla
+    ilceSonucAlani.style.display = "none";
+    sonucCizgisi.style.display = "none";
+    
+    if (secilenIl) {
+      ilceSelect.disabled = false;
+      
+      // İl Genel Kodunu Göster
+      txtSecilenIl.textContent = secilenIl;
+      ilPostaKodu.textContent = ilGenelKodlari[secilenIl];
+      sonucAlani.style.display = "block";
+      
+      // İlçeleri listeye doldur
+      const ilceler = Object.keys(postaKoduVerisi[secilenIl]).sort();
+      ilceler.forEach(ilce => {
+        let option = document.createElement("option");
+        option.value = ilce;
+        option.textContent = ilce;
+        ilceSelect.appendChild(option);
+      });
+    } else {
+      ilceSelect.disabled = true;
+      ilceSelect.innerHTML = '<option value="">Önce İl Seçmelisiniz</option>';
+      sonucAlani.style.display = "none";
+    }
+  });
+
+  // İlçe Seçildiğinde Çalışacak Kodlar
+  ilceSelect.addEventListener("change", function() {
+    const secilenIl = ilSelect.value;
+    const secilenIlce = this.value;
+    
+    if (secilenIlce) {
+      // İlçe Kodunu Göster
+      txtSecilenIlce.textContent = secilenIlce;
+      ilcePostaKodu.textContent = postaKoduVerisi[secilenIl][secilenIlce];
+      
+      // Görsel çizgiyi ve ilçe alanı görünür yap
+      sonucCizgisi.style.display = "block";
+      ilceSonucAlani.style.display = "block";
+    } else {
+      sonucCizgisi.style.display = "none";
+      ilceSonucAlani.style.display = "none";
+    }
+  });
+</script>
