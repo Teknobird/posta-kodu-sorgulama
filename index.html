@@ -144,8 +144,11 @@
     cursor: not-allowed;
   }
 
+  /* DÜZELTME: sabit max-height yerine JS ile hesaplanan değer kullanılıyor.
+     Başlangıçta max-height: none, açılırken JS class ekleyip inline stil
+     olarak gerçek yüksekliği set ediyor; böylece hiçbir zaman kesilme olmuyor. */
   .pk-result {
-    margin-top: 18px;
+    margin-top: 0;
     padding: 0;
     max-height: 0;
     opacity: 0;
@@ -154,8 +157,9 @@
   }
 
   .pk-result.pk-visible {
-    max-height: 200px;
+    margin-top: 18px;
     opacity: 1;
+    /* max-height JS tarafından inline olarak ayarlanır (bkz. script) */
   }
 
   .pk-result-inner {
@@ -370,6 +374,20 @@
   const txtSecilenIlce = document.getElementById("txtSecilenIlce");
   const pkContainer = document.getElementById("pkContainer");
 
+  // DÜZELTME: sabit max-height yerine sonuç kutusunun gerçek içerik
+  // yüksekliğini ölçüp inline stil olarak uyguluyoruz. Bu sayede il+ilçe
+  // ikisi birden göründüğünde asla kesilme olmuyor.
+  function sonucYuksekliginiAyarla() {
+    if (sonucAlani.classList.contains("pk-visible")) {
+      // Ölçüm yapabilmek için geçici olarak sınırı kaldırıyoruz
+      sonucAlani.style.maxHeight = "none";
+      const gercekYukseklik = sonucAlani.scrollHeight;
+      sonucAlani.style.maxHeight = gercekYukseklik + "px";
+    } else {
+      sonucAlani.style.maxHeight = "0px";
+    }
+  }
+
   // Üst pencereye (WordPress sitesine) gerçek yüksekliği bildir,
   // böylece iframe her zaman içerik kadar yer kaplar, fazladan boşluk kalmaz.
   function bildirYukseklik() {
@@ -417,6 +435,7 @@
       sonucAlani.classList.remove("pk-visible");
     }
 
+    sonucYuksekliginiAyarla();
     setTimeout(bildirYukseklik, 60);
     setTimeout(bildirYukseklik, 400);
   });
@@ -437,6 +456,8 @@
       ilceSonucAlani.style.display = "none";
     }
 
+    // İlçe alanı açılıp kapandığında da yüksekliği yeniden hesapla
+    sonucYuksekliginiAyarla();
     setTimeout(bildirYukseklik, 60);
     setTimeout(bildirYukseklik, 400);
   });
